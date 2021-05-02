@@ -1,0 +1,106 @@
+package com.example.projectsingularity.code;
+
+import android.Manifest;
+import android.content.Context;
+import android.os.Build;
+import android.os.Bundle;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.projectsingularity.FileIoFragment;
+import com.example.projectsingularity.PolarHrFragment;
+import com.example.projectsingularity.R;
+import com.google.android.material.tabs.TabLayout;
+
+
+@RequiresApi(api = Build.VERSION_CODES.M)
+public class MainActivity extends AppCompatActivity {
+
+
+
+    private static final int LOCATION_ACCESS_REQUEST = 1;
+    FragmentManager fm = getSupportFragmentManager();
+    Fragment fragment = new PolarHrFragment();
+    Fragment fragment1 = new FileIoFragment();
+    boolean added = false;
+
+
+    public static Context contextOfApplication;
+    public static Context getContextOfApplication() {
+        return contextOfApplication;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        contextOfApplication = getApplicationContext();
+
+        //FrameLayout framelay = (FrameLayout) findViewById(R.id.framelay);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tablay);
+
+        TabLayout.Tab firstTab = tabLayout.newTab();
+        firstTab.setText("Connect"); // set the Text for the first Tab
+        //firstTab.setIcon(R.drawable.ic_launcher_foreground); // set an icon for the
+        // first tab
+        tabLayout.addTab(firstTab); // add  the tab at in the TabLayout
+
+        // Create a new Tab named "Second"
+        TabLayout.Tab secondTab = tabLayout.newTab();
+        secondTab.setText("Record"); // set the Text for the second Tab
+        //secondTab.setIcon(R.drawable.ic_launcher_foreground); // set an icon for the second tab
+        tabLayout.addTab(secondTab); // add  the tab  in the TabLayout
+
+        FragmentTransaction ft = fm.beginTransaction();
+        if (!added) {
+            ft.add(R.id.framelay, fragment);
+            ft.add(R.id.framelay, fragment1);
+            added = true;
+        }
+
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.show(fragment);
+        ft.hide(fragment1);
+        ft.commit();
+
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                FragmentTransaction ft = fm.beginTransaction();
+                switch (tab.getPosition()) {
+                    case 0:
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        ft.show(fragment);
+                        ft.hide(fragment1);
+                        ft.commit();
+                        break;
+
+                    case 1:
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        ft.hide(fragment);
+                        ft.show(fragment1);
+                        ft.commit();
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+
+        });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && savedInstanceState == null) {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_ACCESS_REQUEST);
+        }
+    }
+}

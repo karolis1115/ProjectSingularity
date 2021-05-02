@@ -1,0 +1,141 @@
+package com.example.projectsingularity;
+
+import android.app.Dialog;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
+import java.util.Locale;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import polar.com.sdk.api.PolarBleApi;
+import polar.com.sdk.api.PolarBleApiCallback;
+import polar.com.sdk.api.PolarBleApiDefaultImpl;
+import polar.com.sdk.api.errors.PolarInvalidArgument;
+import polar.com.sdk.api.model.PolarHrData;
+
+@RequiresApi(api = Build.VERSION_CODES.M)
+public class PolarActivityHeartRate extends MainActivita {
+    private static final String TAG = PolarActivityHeartRate.class.getSimpleName();
+    PolarBleApi api;
+    Boolean conn = false;
+    Disposable scanDisposable;
+    String PolarHrAddress;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_polar_hr);
+
+        api = PolarBleApiDefaultImpl.defaultImplementation(this, PolarBleApi.FEATURE_HR);
+        api.setPolarFilter(false);
+        api.setApiCallback(new PolarBleApiCallback() {
+            @Override
+            public void hrNotificationReceived(@NonNull String identifier, @NonNull PolarHrData data) {
+                polarHrData(data);
+            }
+        });
+    }
+    public void polarConnDiss(String DEVICE_ID) {
+        final Button conn_diss = this.findViewById(R.id.butt_con_dis);
+        final TextView devid = this.findViewById(R.id.device_id);
+        try {
+            api.connectToDevice(DEVICE_ID);
+        } catch (PolarInvalidArgument polarInvalidArgument) {
+            polarInvalidArgument.printStackTrace();
+        }
+        conn = true;
+        conn_diss.setText("Disconnect");
+        //devid.setText(polarDeviceInfo.deviceId);
+        devid.setText(DEVICE_ID);
+
+
+    }
+
+    public void scanPolarBLE() {
+        final TextView hrt = this.findViewById(R.id.polar_hr_val);
+        final Button conn_diss = this.findViewById(R.id.butt_con_dis);
+        final TextView devid = this.findViewById(R.id.device_id);
+
+        ArrayAdapter<String> DevicesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        Dialog dialog = new Dialog(this, android.R.style.Theme_DeviceDefault_Dialog);
+        dialog.setContentView(R.layout.ble_devices_popup);
+        dialog.setCancelable(true);
+        dialog.setTitle("Polar devices nearby");
+        ListView listView = dialog.findViewById(R.id.Discovered);
+        listView.setAdapter(DevicesAdapter);
+
+        conn_diss.setOnClickListener(view -> {
+            DevicesAdapter.clear();
+            if (scanDisposable == null) {
+                dialog.show();
+                scanDisposable = api.searchForDevice()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                polarDeviceInfo -> {
+                                    Log.d(TAG, "polar device found id: " + polarDeviceInfo.deviceId + " isConnectable: " + polarDeviceInfo.isConnectable);
+                                    if (!polarDeviceInfo.deviceId.isEmpty()) {
+                                        DevicesAdapter.add(polarDeviceInfo.name);
+                                        listView.setOnItemClickListener((parent, view1, position, id) -> {
+                                            String info = ((TextView) view1).getText().toString();
+                                            PolarHrAddress = info.substring(info.length() - 8);
+                                            DevicesAdapter.clear();
+                                            dialog.hide();
+                                            conn_diss.setText("Connecting");
+                                            //polarConnDiss(PolarHrAddress);
+                                        });
+                                    }
+                                });
+            }
+            else if (conn) {
+                scanDisposable.dispose();
+                scanDisposable = null;
+                try {
+                    api.disconnectFromDevice(PolarHrAddress);
+                } catch (PolarInvalidArgument polarInvalidArgument) {
+                    polarInvalidArgument.printStackTrace();
+                }
+                hrt.setText("No data");
+                conn_diss.setText("Connect");
+                devid.setText("None");
+            }
+            dialog.setOnDismissListener(dialog1 -> {
+                if (conn) {
+                    scanDisposable.dispose();
+                    DevicesAdapter.clear();
+                }
+                DevicesAdapter.clear();
+                scanDisposable = null;
+                hrt.setText("No data");
+                conn_diss.setText("Connect");
+                devid.setText("None");
+            });
+        });
+    }
+
+    public void polarHrData(PolarHrData data) {
+        final TextView hrt = this.findViewById(R.id.polar_hr_val);
+        Log.d(TAG, "HR value: " + data.hr + " rrsMs: " + data.rrsMs + " rr: " + data.rrs + " contact: " + data.contactStatus + "," + data.contactStatusSupported);
+        hrt.setText(String.format(Locale.ENGLISH, "%d", data.hr));
+    }
+
+
+    /*@Override
+    public void onBackPressed(){
+        moveTaskToBack(false);
+    }*/
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        api.shutDown();
+    }
+}

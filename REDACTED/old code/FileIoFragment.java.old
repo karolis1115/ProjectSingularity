@@ -1,0 +1,92 @@
+package com.example.projectsingularity;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import androidx.fragment.app.Fragment;
+
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
+import static android.app.Activity.RESULT_OK;
+
+public class FileIoFragment extends Fragment {
+    Boolean stop = false;
+    private static final int WRITE_DOCUMENT_REQUEST = 101;
+    private static final int OPEN_DOCUMENT_REQUEST = 1;
+    OutputStream outputStream = null;
+    String FILE_NAME = "HRT_DAT.txt";
+    View view;
+    String val = "Copyright 2056 Faggot industries";
+
+    public FileIoFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_file_io, container, false);
+        final Button createfile = view.findViewById(R.id.butt_create_file);
+        createfile.setOnClickListener(view1 -> {
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TITLE, FILE_NAME);
+            startActivityForResult(intent, WRITE_DOCUMENT_REQUEST);
+        });
+        return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == WRITE_DOCUMENT_REQUEST) {
+            if (resultCode != RESULT_OK)
+                return;
+            Uri uri = data.getData();
+            try {
+                startrec(uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void startrec(Uri uri) throws FileNotFoundException, IOException {
+        final Button startrec = view.findViewById(R.id.butt_start);
+        startrec.setOnClickListener(view -> {
+            try {
+                outputStream = this.requireContext().getContentResolver().openOutputStream(uri);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+                writer.write(val); //value
+                writer.flush();
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                stoprec(outputStream);
+            }
+
+        });
+    }
+
+    private void stoprec(OutputStream outputStream) {
+        final Button stoprec = view.findViewById(R.id.butt_stop);
+        stoprec.setOnClickListener(view -> {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            stop = true;
+        });
+    }
+}

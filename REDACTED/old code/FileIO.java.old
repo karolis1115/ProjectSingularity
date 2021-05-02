@@ -1,0 +1,95 @@
+package com.example.projectsingularity;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.widget.Button;
+
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
+public class FileIO extends MainActivita {
+    Boolean stop = false;
+    private static final int WRITE_DOCUMENT_REQUEST = 101;
+    private static final int OPEN_DOCUMENT_REQUEST = 1;
+    String FILE_NAME = "HRT_DAT.txt";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+       //setContentView(R.layout.fragment_file_io);
+        createfile();
+
+    }
+
+    public void createfile() {
+        final Button createfile = this.findViewById(R.id.butt_create_file);
+        createfile.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TITLE, FILE_NAME);
+            startActivityForResult(intent, WRITE_DOCUMENT_REQUEST);
+        });
+    }
+
+    /*private void openDocument() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("text/plain");
+        startActivityForResult(intent, OPEN_DOCUMENT_REQUEST);
+    }*/ // open document
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == WRITE_DOCUMENT_REQUEST) {
+            if (resultCode != RESULT_OK)
+                return;
+            Uri uri = data.getData();
+            try {
+                startrec(uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void startrec(Uri uri) throws FileNotFoundException, IOException {
+        final Button startrec = findViewById(R.id.butt_start);
+        startrec.setOnClickListener(view -> {
+            OutputStream outputStream = null;
+            try {
+                outputStream = getContentResolver().openOutputStream(uri);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+                writer.write("hi lol");
+                writer.newLine();
+                writer.flush();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                stoprec(outputStream);
+            }
+
+
+        });
+    }
+
+    private void stoprec(OutputStream outputStream) {
+        final Button stoprec = findViewById(R.id.butt_stop);
+        stoprec.setOnClickListener(view -> {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            stop = true;
+        });
+    }
+
+}

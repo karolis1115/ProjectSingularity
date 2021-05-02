@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: ./app/libs/polar-protobuf-release.aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/79450259c1f0f7dfb3ac1c3000e91252/jetified-polar-protobuf-release/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5b412cc697f9c82e046161bb38cb1850/jetified-polar-protobuf-release/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5b412cc697f9c82e046161bb38cb1850/jetified-polar-protobuf-release/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5b412cc697f9c82e046161bb38cb1850/jetified-polar-protobuf-release/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

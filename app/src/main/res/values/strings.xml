@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Project singularity</string>
+    <string name="sgps_lat_hint">SGPS lat:</string>
+    <string name="sgps_long_hint">SGPS long:</string>
+    <string name="sgps_lat_val">0</string>
+    <string name="sgps_long_val">0</string>
+    <string name="polar_hr_hint">Polar HR:</string>
+    <string name="polar_hr_val">No data</string>
+    <string name="butt_con_dis">Connect</string>
+    <string name="device_id">None</string>
+    <string name="device_id_hint">Device ID:</string>
+    <string name="butt_start">Start recording</string>
+    <string name="butt_stop">Stop recording</string>
+    <string name="butt_create_file">Create file</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+</resources>
