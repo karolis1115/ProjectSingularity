@@ -1,3 +1,3 @@
 # ProjectSingularity
 
-Just a test application to explore different fitness sensors and other stuff :p. idk might make into a full app
+Just a test application to explore the features of a polar H10 heart rate monitor.
